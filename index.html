@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest"></script>
+</head>
+<body>
+    <h1>QR Scanner</h1>
+    <video id="video" width="300" height="200"></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.play();
+                requestAnimationFrame(scanQRCode);
+            })
+            .catch((error) => {
+                console.error('Error accessing camera:', error);
+            });
+
+        function scanQRCode() {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const codeReader = new ZXing.BrowserQRCodeReader();
+            codeReader.decodeFromImageData(imageData)
+                .then((result) => {
+                    console.log('QR code detected:', result.text);
+                    // Do something with the QR code result
+                })
+                .catch((error) => {
+                    console.error('Error decoding QR code:', error);
+                })
+                .finally(() => {
+                    requestAnimationFrame(scanQRCode);
+                });
+        }
+    </script>
+</body>
+</html>
